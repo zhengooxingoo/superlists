@@ -43,36 +43,39 @@ class NewVisitorTest(LiveServerTestCase):
         
         inputbox.send_keys(Keys.ENTER)
         
+        time.sleep(3)
         edith_list_url = self.browser.current_url
         self.assertRegex(edith_list_url,'/lists/.+')
-        with self.wait_for_page_load(timeout=15):
-            self.check_for_row_in_list_table('1:Buy peacock feathers')
+        #with self.wait_for_page_load(timeout=10):
+        self.check_for_row_in_list_table('1:Buy peacock feathers')
         
         inputbox = self.browser.find_element_by_id('id_new_item')
         time.sleep(3)
         inputbox.send_keys('Use peacock feathers to make a fly')
         inputbox.send_keys(Keys.ENTER)
         
-        with self.wait_for_page_load(timeout=15):
-            self.check_for_row_in_list_table('1:Buy peacock feathers')
-            self.check_for_row_in_list_table('2:Use peacock feathers to make a fly')
+        #with self.wait_for_page_load(timeout=10):
+        time.sleep(5)
+        self.check_for_row_in_list_table('1:Buy peacock feathers')
+        self.check_for_row_in_list_table('2:Use peacock feathers to make a fly')
         
         self.browser.quit()
         self.browser = webdriver.Firefox()
         
         #now francis visit the home.html
         #to test one can't get others' lists
-        self.browser.get(live_server_url)
+        self.browser.get(self.live_server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers',page_text)
         self.assertNotIn('make a fly',page_text)
         
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Buy milk')
-        inputbox.send_keys(Keys_ENTER)
+        inputbox.send_keys(Keys.ENTER)
         
+        time.sleep(3)
         francis_list_url = self.browser.current_url
-        self.assertRegex(francis_list_url,'list/.+')
+        self.assertRegex(francis_list_url,'lists/.+')
         self.assertNotEqual(edith_list_url, francis_list_url)
         
         page_text = self.browser.find_element_by_tag_name('body').text
