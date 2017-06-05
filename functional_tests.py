@@ -2,6 +2,10 @@ from selenium import webdriver
 import unittest
 from selenium.webdriver.common.keys import Keys
 import time
+from contextlib import contextmanager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.expected_conditions import staleness_of
+
 
 class NewVisitorTest(unittest.TestCase):
     def setUp(self):
@@ -15,6 +19,12 @@ class NewVisitorTest(unittest.TestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn(row_text,[row.text for row in rows])
+    @contextmanager    
+    def wait_for_page_load(self,timeout =30):
+        old_page = self.browser.find_element_by_tag_name('html')
+        yield WebDriverWait(self.browser, timeout).until(
+            staleness_of(old_page)
+        )
     
     def test_can_start_a_list_and_retrieve_it_later(self):
         self.browser.get("http://localhost:8000")
@@ -33,16 +43,17 @@ class NewVisitorTest(unittest.TestCase):
         
         inputbox.send_keys(Keys.ENTER)
         
-        self.check_for_row_in_list_table('1:Buy peacock feathers')
+        with self.wait_for_page_load(timeout=10):
+            self.check_for_row_in_list_table('1:Buy peacock feathers')
         
         inputbox = self.browser.find_element_by_id('id_new_item')
+        time.sleep(3)
         inputbox.send_keys('Use peacock feathers to make a fly')
         inputbox.send_keys(Keys.ENTER)
         
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.check_for_row_in_list_table('1:Buy peacock feathers')
-        self.check_for_row_in_list_table('2:Use peacock feathers to make a fly')
+        with self.wait_for_page_load(timeout=10):
+            self.check_for_row_in_list_table('1:Buy peacock feathers')
+            self.check_for_row_in_list_table('2:Use peacock feathers to make a fly')
         
         self.fail("Finish the test!")
         
