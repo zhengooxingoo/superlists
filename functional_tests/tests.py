@@ -5,9 +5,9 @@ import time
 from contextlib import contextmanager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import staleness_of
+from django.test import LiveServerTestCase
 
-
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3)
@@ -27,7 +27,7 @@ class NewVisitorTest(unittest.TestCase):
         )
     
     def test_can_start_a_list_and_retrieve_it_later(self):
-        self.browser.get("http://localhost:8000")
+        self.browser.get(self.live_server_url)
         
         self.assertIn('To-Do',self.browser.title)
         header_text = self.browser.find_element_by_tag_name('h1').text
@@ -43,7 +43,7 @@ class NewVisitorTest(unittest.TestCase):
         
         inputbox.send_keys(Keys.ENTER)
         
-        with self.wait_for_page_load(timeout=10):
+        with self.wait_for_page_load(timeout=15):
             self.check_for_row_in_list_table('1:Buy peacock feathers')
         
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -51,11 +51,9 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys('Use peacock feathers to make a fly')
         inputbox.send_keys(Keys.ENTER)
         
-        with self.wait_for_page_load(timeout=10):
+        with self.wait_for_page_load(timeout=15):
             self.check_for_row_in_list_table('1:Buy peacock feathers')
             self.check_for_row_in_list_table('2:Use peacock feathers to make a fly')
         
         self.fail("Finish the test!")
         
-if __name__=="__main__":
-    unittest.main(warnings="ignore")
